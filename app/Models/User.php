@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'alamat',
+        'no_telp',
+        'level',
     ];
 
     /**
@@ -44,5 +47,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function vendor() {
+        return $this->hasMany(Vendor::class, 'id_user');
+    }
+
+    public function transaksiAdopsi() {
+        return $this->hasMany(TransaksiAdopsi::class, 'user_id');
+    }
+
+    public function transaksiPenjualanPet() {
+        return $this->hasMany(TransaksiPenjualanPet::class, 'user_id');
+    }
+
+    public function transaksiPKH() {
+        return $this->hasMany(TransaksiPKH::class, 'user_id');
+    }
+
+    public function pengiriman() {
+        return $this->hasMany(Pengiriman::class, 'id_user');
+    }
+
+    public function cart() {
+        return $this->hasMany(Pengiriman::class, 'id_user');
+    }
+    public function detailaddress() {
+        return $this->hasMany(DetailAddress::class, 'id_user');
     }
 }

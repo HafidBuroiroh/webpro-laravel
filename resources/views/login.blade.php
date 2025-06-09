@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Login V18</title>
+	<title>Petter - Login</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
@@ -26,7 +26,18 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('login_page/css/util.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('login_page/css/main.css')}}">
 <!--===============================================================================================-->
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
+<style>
+    a.btn.btn-outline-danger:hover {
+        background-color: transparent !important;
+        color: #dc3545 !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        text-decoration: none !important;
+    }
+</style>
 <body style="background-color: #222831;">
 	
 	<div class="limiter">
@@ -38,8 +49,8 @@
 						Login to continue
 					</span>
 					
-					 @error('email')
-						<div class="text-red-600">{{ $message }}</div>
+					@error('email')
+						<div class="" style="color: red">{{ $message }}</div>
 					@enderror
 					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
 						<input class="input100" type="text" name="email">
@@ -75,9 +86,27 @@
 							Login
 						</button>
 					</div>
+					<div class="text-center my-2">
+						<span style="color: #ffffff;">Or</span>
+						<a href="/register" style="
+							color: #7a54c0;
+							font-weight: 600;
+							text-decoration: none;
+							font-size: 1rem;
+							transition: color 0.3s ease;">
+							Register Account
+						</a>
+					</div>
 				</form>
 
 				<div class="login100-more" style="background-image: url('/login_background.jpg');">
+					<div class="mx-3 my-3">
+						<a href="{{ url()->previous() }}" 
+						class="btn btn-outline-danger border-0 text-decoration-none" 
+						style="background: none; color: #dc3545; transition: none; pointer-events: auto;">
+							<h2 style="margin: 0;"><i class="bi bi-arrow-left"></i></h2>
+						</a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -103,6 +132,9 @@
 	<script src="{{asset('login_page/vendor/countdowntime/countdowntime.js')}}"></script>
 <!--===============================================================================================-->
 	<script src="{{asset('login_page/js/main.js')}}"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+
 
 </body>
 </html>

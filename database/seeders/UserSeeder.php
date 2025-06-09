@@ -13,12 +13,23 @@ class UserSeeder extends Seeder
     {
         User::create([
             'name' => 'Admin Petter',
-            'email' => 'admin@petter.co.id',
+            'email' => 'It@petter.co.id',
             'email_verified_at' => now(),
-            'password' => Hash::make('AdminPetter99'),
+            'password' => Hash::make('ItPetter99'),
             'alamat' => 'Depok Jawa Barat',
             'no_telp' => '081234567890',
             'level' => 'admin',
+            'remember_token' => Str::random(10),
+        ]);
+
+        User::create([
+            'name' => 'Vendor Petter',
+            'email' => 'Vendor@petter.co.id',
+            'email_verified_at' => now(),
+            'password' => Hash::make('VendorPetter99'),
+            'alamat' => 'SCBD, Tanggerang',
+            'no_telp' => '081234567890',
+            'level' => 'vendor',
             'remember_token' => Str::random(10),
         ]);
     }
