@@ -23,14 +23,25 @@
             </ul>
 
             <p class="fs-4 mb-4">Price: <strong>Rp {{ number_format($product->harga, 0, ',', '.') }}</strong></p>
-
-            <form action="{{ url('/cart/add') }}" method="POST" class="d-flex align-items-center gap-3">
-                @csrf
-                <input type="hidden" name="id_pkh" value="{{ $product->id }}">
-                <button type="submit" class="btn btn-success rounded-pill px-4 py-2">
-                    <i class="bi bi-cart-plus me-1"></i> Add to Cart
-                </button>
-            </form>
+            @auth
+                @if(Auth::user()->level === 'user')
+                    <form action="{{ url('/cart/add') }}" method="POST" class="d-flex align-items-center gap-3">
+                        @csrf
+                        <input type="hidden" name="id_pkh" value="{{ $product->id }}">
+                        <button type="submit" class="btn btn-success rounded-pill px-4 py-2">
+                            <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                        </button>
+                    </form>
+                @else
+                    <a href="/login" class="btn rounded-pill px-4 text-light-color secondark-color poppins-regular">
+                        Sign In
+                    </a>
+                @endif
+            @else
+                <a href="/login" class="btn rounded-pill px-4 text-light-color secondark-color poppins-regular">
+                    Sign In for Transaction
+                </a>
+            @endauth
         </div>
     </div>
 </div>

@@ -1,18 +1,20 @@
 @extends('backend.layout')
 @section('title', 'Vendor')
+
 @section('content')
 <div class="col-12">
   <div class="card">
-    <div class="card-header pb-0">
+    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
       <h6>List Vendor</h6>
+      <a href="{{ url('admin/vendor/create') }}" class="btn btn-primary btn-sm">Tambah Vendor</a>
     </div>
     <div class="card-body px-0 pt-0 pb-2">
       <div class="table-responsive p-3">
-        <table class="table align-items-center mb-0" id="pet-table">
+        <table class="table align-items-center mb-0" id="vendor-table">
           <thead>
             <tr>
               <th>No</th>
-              <th>Nama</th>
+              <th>Nama Toko</th>
               <th>Alamat</th>
               <th style="text-align: center;">Aksi</th>
             </tr>
@@ -24,11 +26,11 @@
                 <td>{{ $vendor->nama_toko }}</td>
                 <td>{{ $vendor->alamat_toko }}</td>
                 <td style="text-align: center;">
-                  <a href="{{ route('vendor.edit', $vendor->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                  <form action="{{ route('vendor.destroy', $vendor->id) }}" method="POST" class="d-inline">
+                  <a href="{{ url('admin/vendor/'.$vendor->id.'/edit') }}" class="btn btn-sm btn-warning">Edit</a>
+                  <form action="{{ url('admin/vendor/'.$vendor->id) }}" method="POST" class="d-inline">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus vendor ini?')">Hapus</button>
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus vendor ini?')">Hapus</button>
                   </form>
                 </td>
               </tr>
@@ -40,6 +42,7 @@
   </div>
 </div>
 @endsection
+
 @push('scripts')
 <!-- jQuery dan DataTables -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -48,7 +51,7 @@
 
 <script>
   $(document).ready(function () {
-    $('#pet-table').DataTable({
+    $('#vendor-table').DataTable({
       responsive: true,
       language: {
         url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'

@@ -96,6 +96,7 @@ return new class extends Migration
 
         Schema::create('transaksi_pkh', function (Blueprint $table) {
             $table->id('id');
+            $table->string('name');
             $table->unsignedBigInteger('id_pkh');
             $table->date('tgl_transaksi');
             $table->decimal('total_transaksi', 12, 2);

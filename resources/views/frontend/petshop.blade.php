@@ -70,6 +70,7 @@
     var pkhData = @json($pkh->values());  // kebutuhan hewan
     const petDetailRoute = "{{ url('/pet') }}"; 
     const productDetailRoute = "{{ url('/product') }}"; 
+    let currentUser = {!! Auth::check() ? json_encode(['level' => Auth::user()->level]) : 'null' !!};
 
     $(document).ready(function(){
 
@@ -134,10 +135,12 @@
                                 </div>
                                 <a href="${productDetailRoute}/${item.id}" class="btn dark-color text-white rounded-pill mt-auto py-2">
                                     Detail
-                                </a>
-                                <a href="#" class="btn btn-success rounded-pill mt-2 add-to-cart-btn py-2" data-id="${item.id}">
-                                    <i class="bi bi-cart-plus"></i> Add to Cart
-                                </a>
+                                </a> 
+                                ${currentUser && currentUser.level === 'user' ? `
+                                    <a href="#" class="btn btn-success rounded-pill mt-2 add-to-cart-btn py-2" data-id="${item.id}">
+                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                    </a>
+                                ` : ''}
                             </div>
                         </div>
                     </div>

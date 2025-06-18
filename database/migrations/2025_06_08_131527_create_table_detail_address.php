@@ -15,18 +15,16 @@ return new class extends Migration
             $table->id();
             $table->longText('address');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('province_id');
-            $table->unsignedBigInteger('district_id');
-            $table->unsignedBigInteger('village_id');
-            $table->longText('post_code');
-            $table->longText('latitude');
-            $table->longText('longitude');
+            $table->unsignedBigInteger('province_code');
+            $table->unsignedBigInteger('district_code');
+            $table->unsignedBigInteger('city_code');
+            $table->unsignedBigInteger('village_code')->nullable();
+            $table->longText('post_code')->nullable();
+            $table->longText('latitude')->nullable();
+            $table->longText('longitude')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('province_id')->references('id')->on('provinces')->onDelete('cascade');
-            $table->foreign('district_id')->references('id')->on('districts')->onDelete('cascade');
-            $table->foreign('village_id')->references('id')->on('villages')->onDelete('cascade');
         });
 
     }

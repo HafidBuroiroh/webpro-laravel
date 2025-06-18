@@ -3,8 +3,9 @@
 @section('content')
 <div class="col-12">
   <div class="card">
-    <div class="card-header pb-0">
+    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
       <h6>List Pet</h6>
+      <a href="{{ route('pets.create') }}" class="btn btn-primary btn-sm">Tambah Pet</a>
     </div>
     <div class="card-body px-0 pt-0 pb-2">
       <div class="table-responsive p-3">
@@ -30,11 +31,12 @@
                 <td>{{ $pet->umur }} tahun</td>
                 <td>{{ ucfirst($pet->status) }}</td>
                 <td style="text-align: center">
-                  <a href="{{ url('pets/edit', $pet->id_pet) }}" class="btn btn-sm btn-warning">Edit</a>
-                  <form action="{{ url('pets/destroy', $pet->id_pet) }}" method="POST" class="d-inline">
+                  <a href="{{ route('pets.show', $pet->id) }}" class="btn btn-sm btn-info mb-1">Detail</a>
+                  <a href="{{ route('pets.edit', $pet->id) }}" class="btn btn-sm btn-warning mb-1">Edit</a>
+                  <form action="{{ route('pets.destroy', $pet->id) }}" method="POST" class="d-inline">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus pet ini?')">Hapus</button>
+                    <button class="btn btn-sm btn-danger mb-1" onclick="return confirm('Yakin hapus pet ini?')">Hapus</button>
                   </form>
                 </td>
               </tr>
@@ -46,6 +48,7 @@
   </div>
 </div>
 @endsection
+
 @push('scripts')
 <!-- jQuery dan DataTables -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

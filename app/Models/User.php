@@ -73,6 +73,6 @@ class User extends Authenticatable
         return $this->hasMany(Pengiriman::class, 'id_user');
     }
     public function detailaddress() {
-        return $this->hasMany(DetailAddress::class, 'id_user');
+        return $this->hasMany(DetailAddress::class, 'user_id');
     }
 }

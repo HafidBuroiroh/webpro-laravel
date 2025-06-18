@@ -10,7 +10,7 @@ class Pet extends Model
     use HasFactory;
     protected $primaryKey = 'id';
     protected $table = 'pets';
-    protected $fillable = ['nama_pet', 'jenis', 'ras', 'umur', 'foto', 'status'];
+    protected $guarded = [];
 
     public function adopsi() {
         return $this->hasMany(Adopsi::class, 'id_pet');

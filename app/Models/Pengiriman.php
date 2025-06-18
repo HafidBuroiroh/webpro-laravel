@@ -11,15 +11,7 @@ class Pengiriman extends Model
 
     protected $primaryKey = 'id';
 
-    protected $fillable = [
-        'id_transaksi_pkh',
-        'kurir',
-        'biaya_ongkir',
-        'pembayaran',
-        'total_biaya',
-        'status',
-        'id_user',
-    ];
+    protected $guarded = [];
 
     public function transaksiPKH()
     {

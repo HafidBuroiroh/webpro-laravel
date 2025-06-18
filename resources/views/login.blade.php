@@ -37,6 +37,17 @@
         box-shadow: none !important;
         text-decoration: none !important;
     }
+	.input100 {
+        color: #ffffff !important;
+    }
+
+    .input100::placeholder {
+        color: #cccccc !important;
+    }
+
+    .input100:focus {
+        color: #ffffff !important;
+    }
 </style>
 <body style="background-color: #222831;">
 	

@@ -3,6 +3,9 @@
 @section('title', 'Shopping Cart')
 
 @section('content')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
 <div class="banner-container position-relative overflow-hidden" style="height: 150px; background-color: #222831;">
     <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="z-index: 2;">
         <div class="container">
@@ -14,129 +17,208 @@
                 </div>
             </div>
         </div>
-    </div>    
+    </div>
 </div>
-<div class="container">
 
+<div class="container py-5">
     @if(Auth::check())
         @php
-            // Get cart items with product relation
             $carts = \App\Models\Cart::where('id_user', Auth::id())->with('pkh')->get();
-            $total = 0;
         @endphp
 
         @if($carts->isEmpty())
             <div class="alert alert-info">Your cart is empty.</div>
         @else
-            <div class="row g-4">
-                @foreach($carts as $cart)
-                    @php
-                        $product = $cart->pkh;
-                        $imagePath = $product && $product->foto
-                            ? asset('pkh_img/' . $product->foto)
-                            : 'https://via.placeholder.com/300x200?text=No+Image';
+            <form id="checkout-form" method="POST" action="">
+                @csrf
+                <div class="row">
+                    <div class="col-lg-8">
+                        @foreach($carts as $cart)
+                            @php
+                                $product = $cart->pkh;
+                                $imagePath = $product && $product->foto
+                                    ? asset('pkh_img/' . $product->foto)
+                                    : 'https://via.placeholder.com/300x200?text=No+Image';
 
-                        $price = $product->harga ?? 0;
-                        $subtotal = $price * $cart->qty;
-                        $total += $subtotal;
-                    @endphp
+                                $price = $product->harga ?? 0;
+                                $subtotal = $price * $cart->qty;
+                            @endphp
 
-                    <div class="col-md-3 mb-4">
-                        <div class="card border-0 rounded-4 overflow-hidden shadow-sm h-100">
-                            <img src="{{ $product && $product->foto ? asset('pkh_img/' . $product->foto) : 'https://via.placeholder.com/300x300?text=No+Image' }}"
-                                class="card-img-top" alt="{{ $product->nama }}" style="height: 300px; object-fit: cover;">
-                            <div class="card-body p-4 semi-color rounded-bottom text-white d-flex flex-column">
-                                <div class="mb-3">
-                                    <h3 class="card-title sniglet-extrabold text-dark-color mb-2">{{ $product->nama }}</h3>
-                                    <div class="mb-3">
-                                        <p class="fw-bold fs-5 mb-1">Rp. {{ number_format($product->harga, 0, ',', '.') }}</p>
+                            <div class="card mb-4 border-0 shadow" style="background-color: #393E46; color: white;">
+                                <div class="row g-0 align-items-center">
+                                    <div class="col-md-1 text-center">
+                                        <input type="checkbox" class="form-check-input select-item" name="selected_items[]" value="{{ $cart->id }}" data-subtotal="{{ $subtotal }}" style="margin-top: 50px;">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <img src="{{ $imagePath }}" class="img-fluid rounded-start" alt="{{ $product->nama }}">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="card-body">
+                                            <h5 class="card-title" style="color: #EEEEEE;">{{ $product->nama }}</h5>
+                                            <p class="card-text mb-1">Rp {{ number_format($product->harga, 0, ',', '.') }}</p>
+                                            <p class="card-text mb-1">Weight: {{ ($product->weight ?? 0) / 1000 }} kg</p>
+                                            <div class="d-flex align-items-center mt-3">
+                                                <input type="number" name="quantity" min="1" value="{{ $cart->qty }}" class="form-control me-2 quantity-input" data-cart-id="{{ $cart->id }}" style="width: 80px;">
+                                                <button class="btn btn-primary btn-sm btn-update-quantity" data-cart-id="{{ $cart->id }}">Update</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <p class="mt-3">Subtotal:</p>
+                                        <p class="fw-bold">Rp {{ number_format($subtotal, 0, ',', '.') }}</p>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <button class="btn btn-danger btn-sm mt-4 btn-remove-cart" data-cart-id="{{ $cart->id }}">
+                                            Remove
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div class="d-flex align-items-center mb-3">
-                                    <input type="number" name="quantity" min="1" value="{{ $cart->qty }}" class="form-control me-2 quantity-input" data-cart-id="{{ $cart->id }}" style="width: 70px;">
-                                    <button class="btn btn-primary btn-sm btn-update-quantity" data-cart-id="{{ $cart->id }}">Update</button>
-                                </div>
-
-                                <p class="card-text mb-3">Subtotal: <strong>Rp {{ number_format($subtotal, 0, ',', '.') }}</strong></p>
-
-                                <button class="btn btn-danger btn-sm btn-remove-cart mt-auto" data-cart-id="{{ $cart->id }}">
-                                    Remove from Cart
-                                </button>
                             </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="col-lg-4">
+                        <div class="card shadow p-4" style="background-color: #393E46; color: white;">
+                            <h5 class="mb-4">Order Summary</h5>
+                            @php
+                                $selectedDistrictCode = $user->detailaddress;
+                            @endphp
+                            <div class="mb-3">
+                                <label for="district" class="form-label">Select Your Address District</label>
+                                <select name="district_code" class="form-select" id="district">
+                                    <option value="">-- Select Your Address District --</option>
+                                    @foreach(\Laravolt\Indonesia\Models\District::orderBy('name')->get() as $district)
+                                        @foreach($selectedDistrictCode as $address)
+                                            <option value="{{ $district->code }}" {{ $district->code == $address->district_id ? 'selected' : '' }}>
+                                                {{ $district->name }}
+                                            </option>
+                                        @endforeach
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total</span>
+                                <strong id="total-price">Rp 0</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Weight</span>
+                                <strong id="total-weight">0 KG</strong>
+                            </div>
+
+                            <hr style="border-color: #EEEEEE;">
+                            <div class="d-flex justify-content-between mb-4">
+                                <span>Grand Total</span>
+                                <strong id="grand-total">Rp 0</strong>
+                            </div>
+
+                            <button type="button" id="btn-checkout" class="btn btn-success w-100">Checkout</button>
                         </div>
                     </div>
-                @endforeach
-            </div>
-
-            <div class="mt-4 d-flex justify-content-between align-items-center">
-                <h4>Total: Rp {{ number_format($total, 0, ',', '.') }}</h4>
-                {{-- <a href="{{ route('cart.checkout') }}" class="btn btn-success btn-lg px-4">
-                    Checkout
-                </a> --}}
-            </div>
+                </div>
+            </form>
         @endif
-
     @else
         <div class="alert alert-warning">
             Please <a href="{{ route('login') }}">login</a> to view your cart.
         </div>
     @endif
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 $(document).ready(function() {
-    // Setup CSRF token for all AJAX
     $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
-    // Update quantity handler
+    function updateTotal() {
+        let total = 0;
+        let totalWeight = 0;
+
+        $('.select-item:checked').each(function() {
+            total += parseInt($(this).data('subtotal'));
+            let row = $(this).closest('.row.g-0');
+            let weightText = row.find('.card-text.mb-1:eq(1)').text();
+            let weightValue = parseFloat(weightText.replace('Weight: ', '').replace(' kg', ''));
+            totalWeight += weightValue;
+        });
+
+        $('#total-price').text('Rp ' + total.toLocaleString('id-ID'));
+        $('#total-weight').text(totalWeight.toLocaleString('id-ID') + ' kg');
+
+        let grandTotal = total;
+
+        $('#grand-total').text('Rp ' + grandTotal.toLocaleString('id-ID'));
+    }
+
+    $('.select-item').on('change', function() {
+        updateTotal();
+    });
+
     $('.btn-update-quantity').click(function(e) {
         e.preventDefault();
-
         const cartId = $(this).data('cart-id');
-        const quantityInput = $(`input.quantity-input[data-cart-id="${cartId}"]`);
-        const quantity = quantityInput.val();
+        const quantity = $(`input.quantity-input[data-cart-id="${cartId}"]`).val();
 
         $.ajax({
             url: '/cart/' + cartId,
             type: 'PUT',
             data: { quantity: quantity },
             success: function(response) {
-                alert(response.message || 'Quantity updated!');
-                location.reload(); // reload to update subtotal and total; you can also update parts dynamically
+                Swal.fire('Updated!', response.message || 'Quantity updated!', 'success').then(() => { location.reload(); });
             },
             error: function(xhr) {
-                alert('Failed to update quantity.');
+                Swal.fire('Error!', 'Failed to update quantity.', 'error');
             }
         });
     });
 
-    // Remove cart item handler
     $('.btn-remove-cart').click(function(e) {
         e.preventDefault();
-
-        if (!confirm('Are you sure you want to remove this item from your cart?')) {
-            return;
-        }
-
         const cartId = $(this).data('cart-id');
 
-        $.ajax({
-            url: '/cart/' + cartId,
-            type: 'DELETE',
-            success: function(response) {
-                alert(response.message || 'Item removed from cart!');
-                location.reload(); // reload to update cart view
-            },
-            error: function(xhr) {
-                alert('Failed to remove item.');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, remove it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/cart/' + cartId,
+                    type: 'DELETE',
+                    success: function(response) {
+                        Swal.fire('Removed!', response.message || 'Item removed from cart!', 'success').then(() => { location.reload(); });
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Failed to remove item.', 'error');
+                    }
+                });
             }
         });
     });
 });
-</script>
 
+$('#btn-checkout').click(function() {
+    let selectedItems = [];
+    $('.select-item:checked').each(function() {
+        selectedItems.push($(this).val());
+    });
+
+    if (selectedItems.length === 0) {
+        Swal.fire('Warning!', 'Please select at least one item to checkout.', 'warning');
+        return;
+    }
+
+    let selectedIds = selectedItems.join(',');
+    window.location.href = '/checkout?selected_cart_ids=' + selectedIds;
+});
+</script>
 @endsection

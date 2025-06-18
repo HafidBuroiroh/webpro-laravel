@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailAddress;
+use Laravolt\Indonesia\Models\Province;
+use Laravolt\Indonesia\Models\City;
+use Laravolt\Indonesia\Models\District;
+use Laravolt\Indonesia\Models\Village;
+
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +21,8 @@ class AuthController extends Controller
     }
 
     public function register(){
-        return view('register');
+        $provinces = Province::all();
+        return view('register', compact('provinces'));
     }
 
      public function postlogin(Request $request)
@@ -52,13 +59,17 @@ class AuthController extends Controller
 
     public function postregister(Request $request)
     {
+        // dd($request);
         // Validate request
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'alamat'   => 'required|string|max:255',
-            'no_telp'  => 'required|string|max:20',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|email|unique:users,email',
+            'password'    => 'required|string|min:6|confirmed',
+            'alamat'      => 'required',
+            'no_telp'     => 'required',
+            'province_id' => 'required',
+            'city_id'     => 'required',
+            'district_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -74,6 +85,18 @@ class AuthController extends Controller
             'no_telp'  => $request->no_telp,
             'level'    => 'user',
         ]);
+
+        // Create detail address
+        DetailAddress::create([
+            'user_id'     => $user->id,
+            'address'     => $request->alamat,
+            'post_code'     => $request->post_code,
+            'province_id' => $request->province_id,
+            'city_id'     => $request->city_id,
+            'district_id' => $request->district_id,
+            'village_id'  => $request->village_id,
+        ]);
+
 
         if ($user->level === 'user') {
             Auth::login($user);
@@ -92,6 +115,24 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    public function getCities($provinceId)
+    {
+        $cities = City::where('province_code', $provinceId)->get(); 
+        return response()->json($cities);
+    }
+
+    public function getDistricts($cityId)
+    {
+        $districts = District::where('city_code', $cityId)->get();
+        return response()->json($districts);
+    }
+
+    public function getVillages($districtId)
+    {
+        $villages = Village::where('district_code', $districtId)->get();
+        return response()->json($villages);
     }
 }
 

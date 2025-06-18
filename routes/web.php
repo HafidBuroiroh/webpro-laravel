@@ -12,6 +12,7 @@ use App\Http\Controllers\TransaksiPenjualanPetController;
 use App\Http\Controllers\TransaksiPKHController;
 use App\Http\Controllers\UserManajementController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -59,4 +60,24 @@ Route::put('/cart/{id}', [FrontendController::class, 'update'])->name('cart.upda
 Route::delete('/cart/{id}', [FrontendController::class, 'destroy'])->name('cart.remove');
 Route::get('/product/{id}', [FrontendController::class, 'productDetail'])->name('product.detail');
 Route::get('/pet/{id}', [FrontendController::class, 'petDetail'])->name('pet.detail');
+Route::put('/cart/{id}', [FrontendController::class, 'updateqty'])->name('cart.update');
+Route::delete('/cart/{id}', [FrontendController::class, 'deletecart'])->name('cart.destroy');
+
 Route::get('/article/{slug}', [FrontendController::class, 'artikeldetail'])->name('artikeldetail');
+
+Route::get('/get-cities/{provinceId}', [AuthController::class, 'getCities']);
+Route::get('/get-districts/{cityId}', [AuthController::class, 'getDistricts']);
+Route::get('/get-villages/{districtId}', [AuthController::class, 'getVillages']);
+
+Route::get('/checkout', [CheckoutController::class, 'checkoutView'])->name('checkout.view');
+Route::post('/get-shipping-cost', [CheckoutController::class, 'getShippingCost'])->name('get.shipping.cost');
+Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('process.checkout');
+Route::get('/checkout/payment/{id}', [CheckoutController::class, 'paymentPage'])->name('checkout.payment');
+Route::get('/checkout-success', function () {
+    return view('frontend.checkout_success');
+})->name('checkout.success');
+Route::get('/history-transaction', [CheckoutController::class, 'history'])->name('transaction.history');
+Route::get('/transaction/{id}', [CheckoutController::class, 'detailTransaction'])->name('transaction.detail');
+Route::post('/transaction/{id}/confirm', [CheckoutController::class, 'confirmTransaction'])->name('transaction.confirm');
+Route::post('/transaction/{id}/cancel', [CheckoutController::class, 'cancelTransaction'])->name('transaction.cancel');
+

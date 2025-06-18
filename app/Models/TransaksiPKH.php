@@ -10,14 +10,14 @@ class TransaksiPKH extends Model
     use HasFactory;
     protected $table = 'transaksi_pkh';
     protected $primaryKey = 'id';
-    protected $fillable = ['id_pkh', 'tgl_transaksi', 'total_transaksi', 'status', 'user_id'];
+    protected $guarded = [];
 
     public function pkh() {
         return $this->belongsTo(PKH::class, 'id');
     }
 
     public function user() {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function pengiriman() {

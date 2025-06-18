@@ -36,22 +36,33 @@
                 @endif
 
             </ul>
-
-            @if ($pet->status === 'adopsi' && $pet->adopsi)
-                @foreach($pet->adopsi as $adopsi)
-                    <p class="fs-4">Adoption Fee:
-                        <strong>Rp {{ number_format($adopsi->harga_adopsi, 0, ',', '.') }}</strong>
-                    </p>
-                    <a href="#" class="btn btn-success rounded-pill px-4 py-2">Adopt Now</a>
-                @endforeach
-            @elseif ($pet->status === 'dijual' && $pet->penjualan)
-                @foreach($pet->penjualan as $j)
-                    <p class="fs-4">Price:
-                        <strong>Rp {{ number_format($j->harga, 0, ',', '.') }}</strong>
-                    </p>
-                    <a href="#" class="btn btn-light text-dark rounded-pill px-4 py-2">Buy Now</a>
-                @endforeach
-            @endif
+            @auth
+                @if(Auth::user()->level === 'user')
+                     @if ($pet->status === 'adopsi' && $pet->adopsi)
+                        @foreach($pet->adopsi as $adopsi)
+                            <p class="fs-4">Adoption Fee:
+                                <strong>Rp {{ number_format($adopsi->harga_adopsi, 0, ',', '.') }}</strong>
+                            </p>
+                            <a href="https://wa.me/+6285215054506?text=I'm%20interested%20in%20to%20adopt%20your%20pet%20{{$pet->nama_pet}}" target="_blank" class="btn btn-light text-dark rounded-pill px-4 py-2">Adopt now</a>
+                        @endforeach
+                    @elseif ($pet->status === 'dijual' && $pet->penjualan)
+                        @foreach($pet->penjualan as $j)
+                            <p class="fs-4">Price:
+                                <strong>Rp {{ number_format($j->harga, 0, ',', '.') }}</strong>
+                            </p>
+                            <a href="https://wa.me/+6285215054506?text=I'm%20interested%20in%20to%20buy%20your%20pet%20{{$pet->nama_pet}}" target="_blank" class="btn btn-light text-dark rounded-pill px-4 py-2">Shop now</a>
+                        @endforeach
+                    @endif
+                @else
+                    <a href="/login" class="btn rounded-pill px-4 text-light-color secondark-color poppins-regular">
+                        Sign In
+                    </a>
+                @endif
+            @else
+                <a href="/login" class="btn rounded-pill px-4 text-light-color secondark-color poppins-regular">
+                    Sign In for Transaction
+                </a>
+            @endauth
         </div>
     </div>
 </div>
