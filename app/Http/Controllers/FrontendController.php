@@ -9,7 +9,9 @@ use App\Models\Artikel;
 use App\Models\Cart;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Laravolt\Indonesia\Models\Province;
 
 class FrontendController extends Controller
 {
@@ -19,14 +21,17 @@ class FrontendController extends Controller
     }
 
     public function adopt(){
-        $pet = Pet::where('status', 'adopsi')->with(['adopsi'])->get();
+        $pet = Pet::where('status', 'adopsi')->whereHas('adopsi', function($q){
+            $q->where('status', 'tersedia');
+        })->get();
+
         return view('frontend.adopt', compact('pet'));
     }
 
     public function petshop(){
-        $petjual = Pet::with(['penjualan' => function($q) {
+        $petjual = Pet::where('status', 'dijual')->whereHas('penjualan', function($q){
             $q->where('status', 'tersedia');
-        }])->where('status', 'dijual')->get();
+        })->get();
 
         $pkh = PKH::all();
         return view('frontend.petshop', compact('petjual', 'pkh'));
@@ -45,19 +50,36 @@ class FrontendController extends Controller
 
     public function addToCart(Request $request)
     {
-        $request->validate([
-            'id_pkh' => 'required|exists:penjualan_kebutuhan_hewan,id',
-        ]);
+        try {
+            $request->validate([
+                'id_pkh' => 'required|exists:penjualan_kebutuhan_hewan,id',
+            ]);
 
-        Cart::create([
-            'id_user' => Auth::id(),
-            'id_pkh' => $request->id_pkh,
-            'qty' => 1,
-        ]);
+            $userId = Auth::id();
+            $productId = $request->id_pkh;
 
-        return response()->json([
-            'message' => 'Item added to cart successfully!',
-        ]);
+            // Cek apakah produk sudah ada di cart
+            $existingCart = Cart::where('id_user', $userId)
+                                ->where('id_pkh', $productId)
+                                ->first();
+
+            if ($existingCart) {
+                // Kalau produk sudah ada, tambahkan qty
+                $existingCart->qty += 1;
+                $existingCart->save();
+            } else {
+                // Kalau produk belum ada, buat baru
+                Cart::create([
+                    'id_user' => $userId,
+                    'id_pkh' => $productId,
+                    'qty' => 1
+                ]);
+            }
+
+            return response()->json(['message' => 'Produk berhasil ditambahkan ke keranjang!']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, $id) {
@@ -228,6 +250,102 @@ class FrontendController extends Controller
         \App\Models\Cart::whereIn('id', $selectedItems)->delete();
 
         return redirect()->route('cart')->with('success', 'Order placed successfully!');
+    }
+
+    public function setting(){
+        $user = Auth::user();
+        $provinces = Province::all();
+        return view('frontend.user-dashboard', compact('user', 'provinces'));
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => '',
+            'new_password' => 'min:6',
+            'confirm_password' => 'same:new_password',
+        ]);
+
+        $user = User::where('id', Auth::id())->first();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect()->back()->with('error', 'Current password is incorrect.');
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return redirect()->back()->with('success', 'Password successfully updated.');
+    }
+
+    public function updateAddress(Request $request)
+    {
+        $request->validate([
+            'alamat' => '',
+            'province_code' => '',
+            'city_code' => '',
+            'district_code' => '',
+        ]);
+
+        $user = User::where('id', Auth::id())->first();
+        $user->update([
+            'alamat' => $request->alamat,
+        ]);
+
+        $detailAddress = $user->detailaddress()->first();
+
+        if ($detailAddress) {
+            // Update dengan fallback ke data lama jika request tidak diisi
+            $detailAddress->update([
+                'address' => $request->alamat ?? $detailAddress->address,
+                'province_id' => $request->province_code ?? $detailAddress->province_id,
+                'city_id' => $request->city_code ?? $detailAddress->city_id,
+                'district_id' => $request->district_code ?? $detailAddress->district_id,
+                'village_id' => $request->village_code ?? $detailAddress->village_id,
+                'post_code' => $request->post_code ?? $detailAddress->post_code,
+            ]);
+        }
+
+
+        return redirect()->back()->with('success', 'Address successfully updated.');
+    }
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'string|max:255',
+            'email' => 'email|max:255',
+            'no_telp' => 'number',
+        ]);
+
+        $user = User::where('id', Auth::id())->first();
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'no_telp' => $request->no_telp,
+        ]);
+
+        return redirect()->back()->with('success', 'Profile successfully updated.');
+    }
+
+    public function search(Request $request){
+        $query = $request->input('query');
+        $pet = Pet::where(function ($queryBuilder) use ($query) {
+                $queryBuilder->where('nama_pet', 'LIKE', "%$query%")
+                    ->orWhere('jenis', 'LIKE', "%$query%")
+                    ->orWhere('deskripsi', 'LIKE', "%$query%");
+            })
+            ->where(function ($q) {
+                $q->whereHas('adopsi', function ($adopsi) {
+                    $adopsi->where('status', 'tersedia');
+                })
+                ->orWhereHas('penjualan', function ($penjualan) {
+                    $penjualan->where('status', 'tersedia');
+                });
+            })
+            ->get();
+        $pkh = PKH::where('nama', 'LIKE', "%$query%")->get();
+
+        return view('frontend.search', compact('pet', 'query', 'pkh'));
     }
 
 }

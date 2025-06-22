@@ -9,10 +9,10 @@ class TransaksiAdopsi extends Model
 {
     use HasFactory;
     protected $primaryKey = 'id';
-    protected $fillable = ['id_adopsi', 'tgl_transaksi', 'total_transaksi', 'status', 'keterangan', 'user_id', 'vendor_id'];
+    protected $guarded = [];
 
     public function adopsi() {
-        return $this->belongsTo(Adopsi::class, 'id_adopsi');
+        return $this->belongsTo(Adopsi::class, 'id_adopt');
     }
 
     public function user() {

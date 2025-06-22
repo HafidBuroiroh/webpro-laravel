@@ -48,7 +48,7 @@
             </div>
 
             <div class="d-flex gap-2 align-items-center">
-                <form action="/search" method="GET" class="d-flex align-items-center rounded-pill border" style="overflow: hidden" role="search">
+                <form action="{{ url('search') }}" method="GET" class="d-flex align-items-center rounded-pill border" style="overflow: hidden" role="search">
                     <div class="input-group rounded-pill" style="width: 150px;">
                         <span class="input-group-text bg-white border-end-0">
                             <i class="bi bi-search"></i>

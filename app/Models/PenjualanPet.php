@@ -15,4 +15,8 @@ class PenjualanPet extends Model
     public function jualpet() {
         return $this->belongsTo(Pet::class, 'id_pet');
     }
+
+    public function transaksi() {
+        return $this->hasMany(TransaksiPenjualanPet::class, 'id_penjualan');
+    }
 }

@@ -14,7 +14,7 @@ class AdopsiController extends Controller
      */
     public function index()
     {
-        $adopts = Adopsi::all();
+        $adopts = Adopsi::where('status', 'tersedia')->get();
         return view('backend.adopt.index', compact('adopts'));
     }
 

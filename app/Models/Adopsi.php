@@ -20,4 +20,8 @@ class Adopsi extends Model
     {
         return $this->belongsTo(Vendor::class, 'id_vendor');
     }
+
+    public function transaksi() {
+        return $this->hasMany(TransaksiAdopsi::class, 'id_adopt');
+    }
 }

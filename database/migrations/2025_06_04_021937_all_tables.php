@@ -97,15 +97,13 @@ return new class extends Migration
         Schema::create('transaksi_pkh', function (Blueprint $table) {
             $table->id('id');
             $table->string('name');
-            $table->unsignedBigInteger('id_pkh');
             $table->date('tgl_transaksi');
             $table->decimal('total_transaksi', 12, 2);
             $table->integer('qty');
-            $table->enum('status', ['dikemas', 'dikirim', 'berhasil', 'dibatalkan']);
+            $table->enum('status', ['delay','dikemas', 'dikirim', 'berhasil', 'dibatalkan']);
             $table->unsignedBigInteger('user_id');
             $table->timestamps();
 
-            $table->foreign('id_pkh')->references('id')->on('penjualan_kebutuhan_hewan')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
 

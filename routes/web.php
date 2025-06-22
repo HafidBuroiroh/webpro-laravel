@@ -13,6 +13,8 @@ use App\Http\Controllers\TransaksiPKHController;
 use App\Http\Controllers\UserManajementController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\TransaksiVendorController;
+use App\Http\Controllers\VendorAdopsiController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -39,6 +41,7 @@ Route::middleware(['auth', 'level:admin'])->prefix('admin')->group(function(){
     Route::resource('/transaksi-adopsi', TransaksiAdopsiController::class);
     Route::resource('/transaksi-penjualan', TransaksiPenjualanPetController::class);
     Route::resource('/transaksi-pkh', TransaksiPKHController::class);
+    Route::post('transaksi-pkh/{id}/update-status', [TransaksiPKHController::class, 'updateStatus'])->name('admin.transaksi.updateStatus');
     Route::resource('/users', UserManajementController::class);
 });
 // End Admin
@@ -46,12 +49,15 @@ Route::middleware(['auth', 'level:admin'])->prefix('admin')->group(function(){
 // Vendor
 Route::middleware(['auth', 'level:vendor'])->prefix('vendor')->group(function(){
     Route::get('/dashboard', [DashboardController::class, 'vendordashboard'])->name('vendordashboard');
+    Route::resource('/adopt', VendorAdopsiController::class);
+    Route::resource('/transaksi-adopsi', TransaksiVendorController::class);
 });
 // End Vendor
 
 // Frontend
 Route::get('/', [FrontendController::class, 'index'])->name('beranda');
 Route::get('/adopt', [FrontendController::class, 'adopt'])->name('adopt');
+Route::get('/search', [FrontendController::class, 'search'])->name('search');
 Route::get('/pet-shop', [FrontendController::class, 'petshop'])->name('pet-shop');
 Route::get('/other', [FrontendController::class, 'other'])->name('other');
 Route::get('/my/cart', [FrontendController::class, 'cart'])->name('cart');
@@ -80,4 +86,11 @@ Route::get('/history-transaction', [CheckoutController::class, 'history'])->name
 Route::get('/transaction/{id}', [CheckoutController::class, 'detailTransaction'])->name('transaction.detail');
 Route::post('/transaction/{id}/confirm', [CheckoutController::class, 'confirmTransaction'])->name('transaction.confirm');
 Route::post('/transaction/{id}/cancel', [CheckoutController::class, 'cancelTransaction'])->name('transaction.cancel');
+Route::post('/payment/{id}/simulate-success', [CheckoutController::class, 'simulateSuccess'])->name('payment.simulate-success');
+Route::get('/settings', [FrontendController::class, 'setting'])->name('user.setting');
+Route::post('/update-password', [FrontendController::class, 'updatePassword'])->name('user.updatePassword');
+Route::post('/update-address', [FrontendController::class, 'updateAddress'])->name('user.updateAddress');
+Route::post('/update-profile', [FrontendController::class, 'updateProfile'])->name('user.update.profile');
+
+
 

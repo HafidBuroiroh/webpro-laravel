@@ -191,14 +191,14 @@
                         $.each(data, function (key, value) {
                             $('#city').append('<option value="' + value.code + '">' + value.name + '</option>');
                         });
-                        $('#district').empty();
-                        $('#village').empty();
+                        $('#district').empty().append('<option value="">-- Select District --</option>');
+                        $('#village').empty().append('<option value="">-- Select Village --</option>');
                     }
                 });
             } else {
-                $('#city').empty();
-                $('#district').empty();
-                $('#village').empty();
+                $('#city').empty().append('<option value="">-- Select City --</option>');
+                $('#district').empty().append('<option value="">-- Select District --</option>');
+                $('#village').empty().append('<option value="">-- Select Village --</option>');
             }
         });
 
@@ -215,12 +215,12 @@
                         $.each(data, function (key, value) {
                             $('#district').append('<option value="' + value.code + '">' + value.name + '</option>');
                         });
-                        $('#village').empty();
+                        $('#village').empty().append('<option value="">-- Select Village --</option>');
                     }
                 });
             } else {
-                $('#district').empty();
-                $('#village').empty();
+                $('#district').empty().append('<option value="">-- Select District --</option>');
+                $('#village').empty().append('<option value="">-- Select Village --</option>');
             }
         });
 
@@ -240,7 +240,7 @@
                     }
                 });
             } else {
-                $('#village').empty();
+                $('#village').empty().append('<option value="">-- Select Village --</option>');
             }
         });
     </script>

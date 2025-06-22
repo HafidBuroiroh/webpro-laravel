@@ -12,15 +12,16 @@ class TransaksiPKH extends Model
     protected $primaryKey = 'id';
     protected $guarded = [];
 
-    public function pkh() {
-        return $this->belongsTo(PKH::class, 'id');
-    }
-
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
     }
 
     public function pengiriman() {
         return $this->hasMany(Pengiriman::class, 'id_transaksi_pkh');
+    }
+    
+    public function productTransactions()
+    {
+        return $this->hasMany(ProductTransaction::class, 'transaksi_pkh_id');
     }
 }

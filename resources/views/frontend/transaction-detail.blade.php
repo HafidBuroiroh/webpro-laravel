@@ -24,15 +24,55 @@
                 @endphp
                 <span class="badge {{ $badgeClass }} ms-2">{{ ucfirst($transaction->status) }}</span>
             </li>
+            <li class="list-group-item bg-transparent text-white"><strong>Courier:</strong> {{ strtoupper($transaction->pengiriman->first()->kurir) }}</li>
         </ul>
 
         <h5 class="mb-3">Product Info</h5>
+        @php
+            $totalProductPrice = 0;
+        @endphp
+
         <ul class="list-group list-group-flush mb-3">
-            <li class="list-group-item bg-transparent text-white"><strong>Image Product:</strong> <img src="{{asset('pkh_img/'.$transaction->pkh->foto)}}" class="card-img-top" alt="{{$transaction->pkh->nama}}" style="width: 300px; object-fit: cover;"></li>
-            <li class="list-group-item bg-transparent text-white"><strong>Product:</strong> {{ $transaction->pkh->nama }}</li>
-            <li class="list-group-item bg-transparent text-white"><strong>Quantity:</strong> {{ $transaction->qty }}</li>
-            <li class="list-group-item bg-transparent text-white"><strong>Total Payment:</strong> Rp {{ number_format($transaction->total_transaksi, 0, ',', '.') }}</li>
+            @foreach($transaction->productTransactions as $productTransaction)
+                @php
+                    $subtotal = $productTransaction->product->harga * $productTransaction->qty;
+                    $totalProductPrice += $subtotal;
+                @endphp
+                <li class="list-group-item bg-transparent text-white">
+                    <strong>Image Product:</strong> 
+                    <img src="{{ asset('pkh_img/' . $productTransaction->product->foto) }}" 
+                        class="card-img-top my-2" 
+                        alt="{{ $productTransaction->product->nama }}" 
+                        style="width: 300px; object-fit: cover;">
+                </li>
+                <li class="list-group-item bg-transparent text-white">
+                    <strong>Product:</strong> {{ $productTransaction->product->nama }}
+                </li>
+                <li class="list-group-item bg-transparent text-white">
+                    <strong>Quantity:</strong> {{ $productTransaction->qty }}
+                </li>
+                <li class="list-group-item bg-transparent text-white">
+                    <strong>Subtotal:</strong> Rp {{ number_format($subtotal, 0, ',', '.') }}
+                </li>
+                <hr class="text-white">
+            @endforeach
+
+            {{-- Total Product Price --}}
+            <li class="list-group-item bg-transparent text-white">
+                <strong>Total Product Price:</strong> Rp {{ number_format($totalProductPrice, 0, ',', '.') }}
+            </li>
+
+            {{-- Shipping Cost --}}
+            <li class="list-group-item bg-transparent text-white">
+                <strong>Shipping Cost:</strong> Rp {{ number_format($transaction->pengiriman->first()->biaya_ongkir, 0, ',', '.') }}
+            </li>
+
+            {{-- Total Payment --}}
+            <li class="list-group-item bg-transparent text-white">
+                <strong>Total Payment:</strong> Rp {{ number_format($transaction->total_transaksi, 0, ',', '.') }}
+            </li>
         </ul>
+
 
         <h5 class="mb-3">Customer Info</h5>
         <ul class="list-group list-group-flush">

@@ -154,15 +154,17 @@
         }
     $(document).on('click', '.add-to-cart-btn', function(e) {
         e.preventDefault();
-        console.log("Button clicked"); // Debug line
 
-        const itemId = $(this).data('id');
+        const button = $(this);
+        button.prop('disabled', true).text('Processing...'); // Disable button & ubah text
+
+        const itemId = button.data('id');
 
         $.ajax({
             url: '/cart/add',
             method: 'POST',
             data: {
-                id_pkh: itemId, // ← match your DB field here
+                id_pkh: itemId,
                 _token: $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
@@ -175,6 +177,7 @@
                     position: 'top-end',
                     showConfirmButton: false
                 });
+                button.prop('disabled', false).html('<i class="bi bi-cart-plus"></i> Add to Cart'); // Enable lagi
             },
             error: function(xhr) {
                 Swal.fire({
@@ -182,9 +185,9 @@
                     title: 'Oops!',
                     text: xhr.responseJSON.message || 'Something went wrong.',
                 });
+                button.prop('disabled', false).html('<i class="bi bi-cart-plus"></i> Add to Cart'); // Enable lagi
             }
         });
-
     });
 
 

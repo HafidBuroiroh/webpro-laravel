@@ -3,6 +3,10 @@
 @section('content')
 <div class="col-12">
   <div class="card">
+    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6>List Transaksi Adopsi</h6>
+          <a href="{{ url('admin/transaksi-adopsi/create') }}" class="btn btn-primary btn-sm">+ Tambah Transaksi</a>
+      </div>
     <div class="card-header pb-0">
       <h6>List Transaksi Adopsi</h6>
     </div>
@@ -23,19 +27,28 @@
             @foreach($transaksi as $index => $adopt)
               <tr>
                 <td>{{ $index + 1 }}</td>
-                <td>{{ $adopt->pet->nama_pet ?? '-' }}</td>
-                <td>{{ number_format($adopt->total_transaksi, 0, ',', '.') }}</td>
-                <td>{{ $adopt->tgl_transaksi }}</td>
-                <td>{{ $adopt->status }}</td>
+                <td>{{ $adopt->adopsi->adoptpet->nama_pet }}</td>
+                <td>Rp {{ number_format($adopt->total_transaksi, 0, ',', '.') }}</td>
+                <td>{{ \Carbon\Carbon::parse($adopt->tgl_transaksi)->format('d M Y') }}</td>
                 <td>
-                  <a href="{{ route('transaksi-adopt.edit', $adopt->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                  <form action="{{ route('transaksi-adopt.destroy', $adopt->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus data ini?')">Hapus</button>
-                  </form>
+                    @if($adopt->status == 'menunggu')
+                        <span class="badge bg-warning text-dark">Menunggu</span>
+                    @elseif($adopt->status == 'berhasil')
+                        <span class="badge bg-success">Berhasil</span>
+                    @elseif($adopt->status == 'dibatalkan')
+                        <span class="badge bg-danger">Dibatalkan</span>
+                    @endif
                 </td>
-              </tr>
+                <td>
+                    <a href="{{ url('admin/transaksi-adopsi/'.$adopt->id.'/edit') }}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ url('admin/transaksi-adopsi/'.$adopt->id) }}" class="btn btn-sm btn-info">Show</a>
+                    <form action="{{ url('admin/transaksi-adopsi/'.$adopt->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus data ini?')">Hapus</button>
+                    </form>
+                </td>
+            </tr>
             @endforeach
           </tbody>
         </table>

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Pengiriman;
 use App\Models\PKH;
+use App\Models\ProductTransaction;
 use App\Models\TransaksiPKH;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -96,7 +97,7 @@ class CheckoutController extends Controller
 
     public function processCheckout(Request $request)
     {
-        try {
+            try {
             $request->validate([
                 'id_pkh' => 'required|array',
                 'id_pkh.*' => 'exists:penjualan_kebutuhan_hewan,id',
@@ -104,60 +105,71 @@ class CheckoutController extends Controller
                 'qty.*' => 'required|integer|min:1',
                 'courier' => 'required',
                 'shipping_cost' => 'required|numeric',
-                // Validasi pembayaran DIHAPUS karena otomatis transfer
             ]);
 
             $user = Auth::user();
-            $transactionIds = [];
+
+            // Hitung total transaksi
+            $totalProductPrice = 0;
 
             foreach ($request->id_pkh as $index => $pkhId) {
                 $product = PKH::findOrFail($pkhId);
-                $productTotal = $product->harga * $request->qty[$index];
-                $ongkirPerProduct = $request->shipping_cost / count($request->id_pkh);
-                $grandTotal = $productTotal + $ongkirPerProduct;
-
-                $newId = TransaksiPKH::max('id') + 1;
-                $name = 'PO/' . now()->format('Y') . '/' . str_pad($newId, 4, '0', STR_PAD_LEFT);
-
-                $transaction = TransaksiPKH::create([
-                    'name' => $name,
-                    'id_pkh' => $product->id,
-                    'tgl_transaksi' => now(),
-                    'total_transaksi' => $grandTotal,
-                    'qty' => $request->qty[$index],
-                    'status' => 'dikemas',
-                    'user_id' => $user->id,
-                ]);
-
-                // Buat pengiriman otomatis dengan pembayaran transfer
-                Pengiriman::create([
-                    'id_transaksi_pkh' => $transaction->id,
-                    'kurir' => $request->courier,
-                    'biaya_ongkir' => $ongkirPerProduct,
-                    'pembayaran' => 'transfer', // Auto set transfer
-                    'total_biaya' => $grandTotal,
-                    'status' => 'diperjalanan',
-                    'id_user' => $user->id,
-                ]);
-
-                $transactionIds[] = $transaction->id;
+                $totalProductPrice += $product->harga * $request->qty[$index];
             }
+
+            $grandTotal = $totalProductPrice + $request->shipping_cost;
+
+            // Buat transaksi tunggal
+            $newId = TransaksiPKH::max('id') + 1;
+            $name = 'TO/' . now()->format('Y') . '/' . str_pad($newId, 4, '0', STR_PAD_LEFT);
+
+            $transaction = TransaksiPKH::create([
+                'name' => $name,
+                'tgl_transaksi' => now(),
+                'total_transaksi' => $grandTotal,
+                'status' => 'delay',
+                'user_id' => $user->id,
+            ]);
+
+            // Simpan detail produk di ProductTransaction
+            foreach ($request->id_pkh as $index => $pkhId) {
+                $product = PKH::findOrFail($pkhId);
+                $productTotal = $product->harga * $request->qty[$index];
+
+                ProductTransaction::create([
+                    'transaksi_pkh_id' => $transaction->id,
+                    'id_pkh' => $product->id,
+                    'qty' => $request->qty[$index],
+                    'subtotal' => $productTotal,
+                ]);
+            }
+
+            // Buat data pengiriman
+            Pengiriman::create([
+                'id_transaksi_pkh' => $transaction->id,
+                'kurir' => $request->courier,
+                'biaya_ongkir' => $request->shipping_cost,
+                'pembayaran' => 'transfer',
+                'total_biaya' => $grandTotal,
+                'status' => 'diperjalanan',
+                'id_user' => $user->id,
+            ]);
 
             // Hapus cart setelah checkout
             Cart::where('id_user', Auth::id())
                 ->whereIn('id_pkh', $request->id_pkh)
                 ->delete();
 
-            return redirect()->route('checkout.payment', $transactionIds[0])->with('success', 'Transaksi berhasil dibuat.');
-
+            return redirect()->route('checkout.payment', $transaction->id)->with('success', 'Transaksi berhasil dibuat.');
         } catch (\Exception $e) {
-            return back()->withErrors(['checkout_error' => 'Checkout gagal: ' . $e->getMessage()]);
+            return back()->with('error', 'Terjadi kesalahan saat proses checkout: ' . $e->getMessage());
         }
     }
 
     public function paymentPage($id)
     {
          $transaction = TransaksiPKH::findOrFail($id);
+        //  dd($transaction->user);
 
         // ✅ Setup Midtrans Config
         Config::$serverKey = config('midtrans.server_key');
@@ -173,7 +185,7 @@ class CheckoutController extends Controller
                 'gross_amount' => (int)$transaction->total_transaksi,
             ],
             'customer_details' => [
-                'first_name' => $transaction->user->name,
+                'name' => $transaction->user->name,
                 'email' => $transaction->user->email,
             ],
         ];
@@ -184,19 +196,29 @@ class CheckoutController extends Controller
         return view('frontend.payment', compact('transaction', 'snapToken'));
     }
 
+    public function simulateSuccess($id)
+    {
+        $transaction = TransaksiPKH::findOrFail($id);
+        $transaction->status = 'dikemas'; 
+        $transaction->save();
+
+        return redirect('/checkout-success')->with('success', 'Pembayaran berhasil disimulasikan.');
+    }
+
     public function history()
     {
-        $transactions = TransaksiPKH::with('pkh')
+        $transactions = TransaksiPKH::with(['productTransactions.product'])
             ->where('user_id', Auth::id())
-            ->orderBy('tgl_transaksi', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
 
         return view('frontend.transaction', compact('transactions'));
     }
 
+
     public function detailTransaction($id)
     {
-        $transaction = TransaksiPKH::with('pkh', 'user')->findOrFail($id);
+        $transaction = TransaksiPKH::with(['productTransactions.product', 'user'])->findOrFail($id);
 
         return view('frontend.transaction-detail', compact('transaction'));
     }

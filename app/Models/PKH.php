@@ -12,8 +12,8 @@ class PKH extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['jenis', 'nama', 'harga', 'foto', 'status'];
 
-    public function transaksiPKH() {
-        return $this->hasMany(TransaksiPKH::class, 'id_pkh');
+    public function transaksi() {
+        return $this->hasMany(ProductTransaction::class, 'id_pkh');
     }
 
     public function cart() {

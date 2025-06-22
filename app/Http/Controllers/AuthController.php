@@ -43,7 +43,7 @@ class AuthController extends Controller
             }
             elseif(Auth::user()->level == 'user'){
                 $request->session()->regenerate();
-                return redirect('/');
+                return redirect('/')->with('success', 'Selamat datang, ' . Auth::user()->name . '!');
             }else{
                 return back()->withErrors([
                     'email' => 'Email Atau Password Salah'

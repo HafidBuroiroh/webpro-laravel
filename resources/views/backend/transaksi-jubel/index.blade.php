@@ -1,11 +1,12 @@
 @extends('backend.layout')
-@section('title', 'Transaksi Adopsi')
+@section('title', 'Transaksi Pet')
 @section('content')
 <div class="col-12">
   <div class="card">
-    <div class="card-header pb-0">
-      <h6>List Transaksi Adopsi</h6>
-    </div>
+    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6>List Transaksi Penjualan Pet</h6>
+          <a href="{{ url('admin/transaksi-penjualan/create') }}" class="btn btn-primary btn-sm">Tambah Transaksi</a>
+      </div>
     <div class="card-body px-0 pt-0 pb-2">
       <div class="table-responsive p-3">
         <table class="table align-items-center mb-0" id="pet-table">
@@ -15,26 +16,25 @@
                 <th>Nama Pet</th>
                 <th>Total Transaksi</th>
                 <th>Tanggal Transaksi</th>
-                <th>Status</th>
                 <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            @foreach($transaksi as $index => $adopt)
+            @foreach($transaksi as $index => $item)
               <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $adopt->pet->nama_pet ?? '-' }}</td>
-                <td>{{ number_format($adopt->total_transaksi, 0, ',', '.') }}</td>
-                <td>{{ $adopt->tgl_transaksi }}</td>
-                <td>{{ $adopt->status }}</td>
-                <td>
-                  <a href="{{ route('transaksi-adopt.edit', $adopt->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                  <form action="{{ route('transaksi-adopt.destroy', $adopt->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus data ini?')">Hapus</button>
-                  </form>
-                </td>
+                  <td>{{ $index + 1 }}</td>
+                  <td>{{ $item->penjualanPet->jualpet->nama_pet ?? '-' }}</td>
+                  <td>{{ number_format($item->total_transaksi, 0, ',', '.') }}</td>
+                  <td>{{ $item->tgl_transaksi }}</td>
+                  <td>
+                      <a href="{{ url('admin/transaksi-penjualan/' . $item->id . '/edit') }}" class="btn btn-warning btn-sm">Edit</a>
+                      <a href="{{ url('admin/transaksi-penjualan/' . $item->id) }}" class="btn btn-info btn-sm">Show</a>
+                      <form action="{{ url('admin/transaksi-penjualan/' . $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus data ini?')">
+                          @csrf
+                          @method('DELETE')
+                          <button class="btn btn-danger btn-sm">Hapus</button>
+                      </form>
+                  </td>
               </tr>
             @endforeach
           </tbody>

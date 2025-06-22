@@ -55,7 +55,7 @@ class VendorController extends Controller
             'status_toko' => $request->status_toko,
         ]);
 
-        return redirect('vendor')->with('success', 'Vendor berhasil ditambahkan.');
+        return redirect('admin/vendor')->with('success', 'Vendor berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -99,7 +99,7 @@ class VendorController extends Controller
             'status_toko' => $request->status_toko,
         ]);
 
-        return redirect('vendor')->with('success', 'Vendor berhasil diperbarui.');
+        return redirect('admin/vendor')->with('success', 'Vendor berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -108,6 +108,6 @@ class VendorController extends Controller
         $vendor->user()->delete(); // Hapus user juga
         $vendor->delete();
 
-        return redirect('vendor')->with('success', 'Vendor berhasil dihapus.');
+        return redirect('admin/vendor')->with('success', 'Vendor berhasil dihapus.');
     }
 }

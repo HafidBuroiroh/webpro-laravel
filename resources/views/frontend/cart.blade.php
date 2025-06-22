@@ -1,3 +1,5 @@
+// resources/views/frontend/cart.blade.php
+
 @extends('frontend.layout')
 
 @section('title', 'Shopping Cart')
@@ -5,6 +7,7 @@
 @section('content')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="banner-container position-relative overflow-hidden" style="height: 150px; background-color: #222831;">
     <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="z-index: 2;">
@@ -77,27 +80,9 @@
                         @endforeach
                     </div>
 
-                    <!-- Summary -->
                     <div class="col-lg-4">
                         <div class="card shadow p-4" style="background-color: #393E46; color: white;">
                             <h5 class="mb-4">Order Summary</h5>
-                            @php
-                                $selectedDistrictCode = $user->detailaddress;
-                            @endphp
-                            <div class="mb-3">
-                                <label for="district" class="form-label">Select Your Address District</label>
-                                <select name="district_code" class="form-select" id="district">
-                                    <option value="">-- Select Your Address District --</option>
-                                    @foreach(\Laravolt\Indonesia\Models\District::orderBy('name')->get() as $district)
-                                        @foreach($selectedDistrictCode as $address)
-                                            <option value="{{ $district->code }}" {{ $district->code == $address->district_id ? 'selected' : '' }}>
-                                                {{ $district->name }}
-                                            </option>
-                                        @endforeach
-                                    @endforeach
-                                </select>
-                            </div>
-
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Total</span>
                                 <strong id="total-price">Rp 0</strong>
@@ -127,8 +112,6 @@
     @endif
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
 $(document).ready(function() {
     $.ajaxSetup({
@@ -142,17 +125,16 @@ $(document).ready(function() {
         $('.select-item:checked').each(function() {
             total += parseInt($(this).data('subtotal'));
             let row = $(this).closest('.row.g-0');
+            let quantity = parseInt(row.find('.quantity-input').val());
             let weightText = row.find('.card-text.mb-1:eq(1)').text();
             let weightValue = parseFloat(weightText.replace('Weight: ', '').replace(' kg', ''));
-            totalWeight += weightValue;
+
+            totalWeight += (weightValue * quantity);
         });
 
         $('#total-price').text('Rp ' + total.toLocaleString('id-ID'));
         $('#total-weight').text(totalWeight.toLocaleString('id-ID') + ' kg');
-
-        let grandTotal = total;
-
-        $('#grand-total').text('Rp ' + grandTotal.toLocaleString('id-ID'));
+        $('#grand-total').text('Rp ' + total.toLocaleString('id-ID'));
     }
 
     $('.select-item').on('change', function() {
@@ -162,7 +144,14 @@ $(document).ready(function() {
     $('.btn-update-quantity').click(function(e) {
         e.preventDefault();
         const cartId = $(this).data('cart-id');
-        const quantity = $(`input.quantity-input[data-cart-id="${cartId}"]`).val();
+        const quantityInput = $(`input.quantity-input[data-cart-id="${cartId}"]`);
+        let quantity = parseInt(quantityInput.val());
+
+        if (quantity < 1) {
+            Swal.fire('Warning!', 'Minimum quantity is 1.', 'warning');
+            quantityInput.val(1);
+            return;
+        }
 
         $.ajax({
             url: '/cart/' + cartId,
@@ -204,21 +193,21 @@ $(document).ready(function() {
             }
         });
     });
-});
 
-$('#btn-checkout').click(function() {
-    let selectedItems = [];
-    $('.select-item:checked').each(function() {
-        selectedItems.push($(this).val());
+    $('#btn-checkout').click(function() {
+        let selectedItems = [];
+        $('.select-item:checked').each(function() {
+            selectedItems.push($(this).val());
+        });
+
+        if (selectedItems.length === 0) {
+            Swal.fire('Warning!', 'Please select at least one item to checkout.', 'warning');
+            return;
+        }
+
+        let selectedIds = selectedItems.join(',');
+        window.location.href = '/checkout?selected_cart_ids=' + selectedIds;
     });
-
-    if (selectedItems.length === 0) {
-        Swal.fire('Warning!', 'Please select at least one item to checkout.', 'warning');
-        return;
-    }
-
-    let selectedIds = selectedItems.join(',');
-    window.location.href = '/checkout?selected_cart_ids=' + selectedIds;
 });
 </script>
 @endsection

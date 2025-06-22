@@ -10,6 +10,7 @@ class Pengiriman extends Model
     use HasFactory;
 
     protected $primaryKey = 'id';
+    protected $table = 'pengirimans';
 
     protected $guarded = [];
 

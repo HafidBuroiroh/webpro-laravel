@@ -33,6 +33,7 @@
     <hr class="horizontal dark mt-0">
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
+        @if (\Illuminate\Support\Facades\Auth::user()->level == 'admin')
         <li class="nav-item">
           <a class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}" href="/admin/dashboard">
             <div class="border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -121,6 +122,40 @@
             <span class="nav-link-text ms-1">Logout</span>
           </a>
         </li>
+        @elseif (\Illuminate\Support\Facades\Auth::user()->level == 'vendor')
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('vendor/dashboard') ? 'active' : '' }}" href="/vendor/dashboard">
+                <div class="border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-display ms-2"></i>
+                </div>
+                <span class="nav-link-text ms-1">Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('vendor/adopt') ? 'active' : '' }}" href="/vendor/adopt">
+                <div class="border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-box2-heart ms-2"></i>
+                </div>
+                <span class="nav-link-text ms-1">Data Pet Adopt</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('vendor/transaksi-adopsi') ? 'active' : '' }}" href="/vendor/transaksi-adopsi">
+                <div class="border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-receipt ms-2"></i>
+                </div>
+                <span class="nav-link-text ms-1">Transaksi Adopsi</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/logout">
+                <div class="border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-box-arrow-in-left ms-2"></i>
+                </div>
+                <span class="nav-link-text ms-1">Logout</span>
+            </a>
+        </li>
+        @endif
       </ul>
     </div>
   </aside>
@@ -146,7 +181,7 @@
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
                 <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Hei Admin</span>
+                <span class="d-sm-inline d-none">Hei {{Auth::user()->name}}</span>
               </a>
             </li>
             

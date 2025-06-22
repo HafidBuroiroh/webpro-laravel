@@ -12,24 +12,25 @@
         <div class="alert alert-info text-center">You have no transactions yet.</div>
     @else
         <div class="table-responsive">
-            <table class="table table-dark table-striped">
+            <table class="table table-dark table-striped text-center" id="transactionTable">
                 <thead>
                     <tr>
                         <th>Transaction Name</th>
-                        <th>Product</th>
-                        <th>Qty</th>
-                        <th>Total</th>
+                        <th>Total Qty</th>
+                        <th>Total Payment</th>
                         <th>Status</th>
                         <th>Date</th>
                         <th>Detail</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($transactions as $transaction)
                         <tr>
                             <td>{{ $transaction->name }}</td>
-                            <td>{{ $transaction->pkh->nama }}</td>
-                            <td>{{ $transaction->qty }}</td>
+                            <td>
+                                {{ $transaction->productTransactions->sum('qty') }}
+                            </td>
                             <td>Rp {{ number_format($transaction->total_transaksi, 0, ',', '.') }}</td>
                             <td>
                                 @php
@@ -37,8 +38,9 @@
                                         'berhasil' => 'bg-success',
                                         'dikirim' => 'bg-warning',
                                         'dikemas' => 'bg-secondary',
+                                        'delay' => 'bg-info',
                                         'dibatalkan' => 'bg-danger',
-                                        default => 'bg-secondary',
+                                        default => 'bg-light',
                                     };
                                 @endphp
 
@@ -62,6 +64,10 @@
                                         <button type="submit" class="btn btn-success">Order Received</button>
                                     </form>
                                 @endif
+
+                                @if($transaction->status == 'delay')
+                                    <a href="{{ route('checkout.payment', $transaction->id) }}" class="btn btn-warning">Payment</a>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -70,4 +76,22 @@
         </div>
     @endif
 </div>
+
+@section('scripts')
+<!-- jQuery first, then DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('#transactionTable').DataTable({
+      responsive: true,
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+      }
+    });
+  });
+</script>
+@endsection
 @endsection

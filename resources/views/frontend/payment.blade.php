@@ -11,6 +11,10 @@
     <p class="text-white mb-4 fs-4">Total Payment: <strong>Rp {{ number_format($transaction->total_transaksi, 0, ',', '.') }}</strong></p>
 
     <button id="pay-button" class="btn btn-success px-4 py-2 rounded-pill fs-5">Proceed Payment</button>
+    <form action="{{ route('payment.simulate-success', $transaction->id) }}" method="POST" style="margin-top: 20px;">
+        @csrf
+        <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fs-5">Done Payment</button>
+    </form>
 </div>
 
 <script>

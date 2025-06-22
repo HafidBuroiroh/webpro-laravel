@@ -26,8 +26,8 @@
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->no_telp }}</td>
                 <td>
-                  <a href="{{ route('user-manajement.edit', $user->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                  <form action="{{ route('user-manajement.destroy', $user->id) }}" method="POST" class="d-inline">
+                  <a href="{{ url('/admin/users'.$user->id.'/edit') }}" class="btn btn-sm btn-warning">Edit</a>
+                  <form action="{{ url('/admin/users'.$user->id) }}" method="POST" class="d-inline">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus user ini?')">Hapus</button>

@@ -12,7 +12,8 @@ class TransaksiPKHController extends Controller
      */
     public function index()
     {
-        //
+        $transaksis = TransaksiPKH::with(['user', 'productTransactions.product'])->orderBy('id', 'desc')->get();
+        return view('backend.transaksipkh.index', compact('transaksis'));
     }
 
     /**
@@ -34,9 +35,23 @@ class TransaksiPKHController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TransaksiPKH $transaksiPKH)
+    public function show($id)
     {
-        //
+        $transaksi = TransaksiPKH::with('productTransactions.product', 'user', 'pengiriman')->findOrFail($id);
+        return view('backend.transaksipkh.show', compact('transaksi'));
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:dikemas,dikirim,berhasil,dibatalkan',
+        ]);
+
+        $transaksi = TransaksiPKH::findOrFail($id);
+        $transaksi->status = $request->status;
+        $transaksi->save();
+
+        return redirect()->back()->with('success', 'Status pengiriman berhasil diupdate.');
     }
 
     /**

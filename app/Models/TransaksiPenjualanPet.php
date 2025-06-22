@@ -9,7 +9,7 @@ class TransaksiPenjualanPet extends Model
 {
     use HasFactory;
     protected $primaryKey = 'id';
-    protected $fillable = ['id_penjualan', 'tgl_transaksi', 'total_transaksi', 'keterangan', 'user_id'];
+    protected $guarded = [];
 
     public function penjualanPet() {
         return $this->belongsTo(PenjualanPet::class, 'id');

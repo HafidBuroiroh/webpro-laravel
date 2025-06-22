@@ -11,6 +11,6 @@ class DashboardController extends Controller
     }
 
     public function vendordashboard(){
-        return view('backend.dashboardvendor');
+        return view('vendor.dashboard');
     }
 }
